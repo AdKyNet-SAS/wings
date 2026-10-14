@@ -1,27 +1,30 @@
 package router
 
 import (
-	"net/http"
-	"path"
-	"os"
-	"io"
 	"crypto/sha256"
 	"encoding/hex"
+	"io"
+	"net/http"
+	"path"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/pterodactyl/wings/router/middleware"
+	"github.com/pterodactyl/wings/server/filesystem"
 )
 
-func FileSHA256(filePath string) (string, error) {
-	file, err := os.Open(filePath)
+// fileSHA256 returns the hex encoded SHA256 hash of the file at the given path,
+// resolved within the server's filesystem root.
+func fileSHA256(fs *filesystem.Filesystem, p string) (string, error) {
+	f, _, err := fs.File(p)
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer f.Close()
 
 	hash := sha256.New()
-	if _, err := io.Copy(hash, file); err != nil {
+	if _, err := io.Copy(hash, f); err != nil {
 		return "", err
 	}
 
@@ -75,7 +78,7 @@ func getInstalledVersion(c *gin.Context) {
 
 			for _, file := range files {
 				if strings.HasSuffix(file.Name(), "-server.jar") || strings.HasSuffix(file.Name(), "-universal.jar") {
-					hash, err := FileSHA256(path.Join(fs.Path(), "libraries/net/minecraftforge/forge", folder, file.Name()))
+					hash, err := fileSHA256(fs, path.Join("libraries/net/minecraftforge/forge", folder, file.Name()))
 
 					if err != nil {
 						c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"success": false, "error": "Failed to get hash."})
@@ -111,7 +114,7 @@ func getInstalledVersion(c *gin.Context) {
 
 			for _, file := range files {
 				if strings.HasSuffix(file.Name(), "-server.jar") || strings.HasSuffix(file.Name(), "-universal.jar") {
-					hash, err := FileSHA256(path.Join(fs.Path(), "libraries/net/neoforged/neoforge", folder, file.Name()))
+					hash, err := fileSHA256(fs, path.Join("libraries/net/neoforged/neoforge", folder, file.Name()))
 
 					if err != nil {
 						c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"success": false, "error": "Failed to get hash."})
@@ -127,7 +130,7 @@ func getInstalledVersion(c *gin.Context) {
 
 	// hash server.jar, if it exists
 	if _, err := fs.Stat(jar); err == nil {
-		hash, err := FileSHA256(path.Join(fs.Path(), jar))
+		hash, err := fileSHA256(fs, jar)
 
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"success": false, "error": "Failed to get hash."})

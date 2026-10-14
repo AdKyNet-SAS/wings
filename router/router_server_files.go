@@ -121,10 +121,11 @@ func getServerFileFingerprints(c *gin.Context) {
 
 			hash := ""
 
-			if algorithm == "sha512" {
+			switch algorithm {
+			case "sha512":
 				hashBytes := sha512.Sum512(buf.Bytes())
 				hash = hex.EncodeToString(hashBytes[:])
-			} else if algorithm == "curseforge" {
+			case "curseforge":
 				hash = filesystem.CalculateCurseForgeFingerprint(buf)
 			}
 

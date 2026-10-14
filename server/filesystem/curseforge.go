@@ -10,7 +10,7 @@ func isIgnoredInCurseForgeFingerprint(b byte) bool {
 }
 
 func computeCurseForgeFingerprintNormalizedLength(buf *bytes.Buffer) int {
-	var len_no_whitespace int = 0
+	len_no_whitespace := 0
 	bytes := buf.Bytes()
 
 	for i := 0; i < buf.Len(); i++ {
@@ -29,8 +29,8 @@ func CalculateCurseForgeFingerprint(buf *bytes.Buffer) string {
 	len := buf.Len()
 	bytes := buf.Bytes()
 
-	var num1 uint32 = uint32(computeCurseForgeFingerprintNormalizedLength(buf))
-	var num2 uint32 = 1 ^ num1
+	num1 := uint32(computeCurseForgeFingerprintNormalizedLength(buf))
+	num2 := 1 ^ num1
 
 	var num3 uint32 = 0
 	var num4 uint32 = 0
@@ -43,8 +43,8 @@ func CalculateCurseForgeFingerprint(buf *bytes.Buffer) string {
 			num4 = 8
 
 			if num4 == 32 {
-				var num6 uint32 = num3 * multiplex
-				var num7 uint32 = (num6 ^ num6>>24) * multiplex
+				num6 := num3 * multiplex
+				num7 := (num6 ^ num6>>24) * multiplex
 
 				num2 = num2*multiplex ^ num7
 				num3 = 0
